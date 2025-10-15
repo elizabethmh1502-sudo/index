@@ -109,31 +109,13 @@
   </div>
 </div>
 
-<!-- SCRIPT para enviar datos automáticamente a Google Sheets -->
+<!-- SCRIPT para enviar datos a Google Sheets -->
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwcgrxn43Gli2iTfD0lKVmOlnOWyKpbOQQYFbhYHnFKexcjIhxAeLVnuNuutmn6tVNT/exec";
 
-function getDeviceModel() {
-  const ua = navigator.userAgent;
-  let model = "Desconocido";
-
-  if (/Android/i.test(ua)) {
-    const match = ua.match(/\(([^)]+)\)/);
-    if (match && match[1]) {
-      const parts = match[1].split(";"); 
-      model = parts[2] ? parts[2].trim() : "Desconocido"; // Android envía marca/modelo
-    }
-  } else if (/iPhone|iPad/i.test(ua)) {
-    model = "iPhone/iPad";
-  } else {
-    // En PC, a veces podemos usar plataforma + navegador
-    model = navigator.platform || "PC Desconocido";
-  }
-  return model;
-}
-
 function getDeviceInfo() {
   const ua = navigator.userAgent;
+
   const deviceType = /Mobi|Android/i.test(ua)
     ? "Celular"
     : /Tablet|iPad/i.test(ua)
@@ -158,29 +140,40 @@ function getDeviceInfo() {
     return "Desconocido";
   })();
 
-  return { deviceType, os, browser };
+  let deviceModel = "Desconocido";
+  if (/Android/i.test(ua)) {
+    const match = ua.match(/\(([^)]+)\)/);
+    if (match && match[1]) {
+      const parts = match[1].split(";");
+      deviceModel = parts[2] ? parts[2].trim() : "Desconocido";
+    }
+  } else if (/iPhone|iPad/i.test(ua)) {
+    deviceModel = "iPhone/iPad";
+  } else {
+    deviceModel = navigator.platform || "PC Desconocido";
+  }
+
+  return { deviceType, os, browser, deviceModel, userAgent: ua };
 }
 
-// Enviar datos automáticamente al entrar a la página
+// Enviar automáticamente al cargar la página
 (async () => {
-  const { deviceType, os, browser } = getDeviceInfo();
-  const deviceModel = getDeviceModel();
+  const { deviceType, os, browser, deviceModel, userAgent } = getDeviceInfo();
   const timestamp = new Date().toLocaleString("es-MX", { timeZone: "America/Mexico_City" });
 
   await fetch(SCRIPT_URL, {
     method: "POST",
     mode: "no-cors",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({ deviceType, os, browser, deviceModel, timestamp })
+    body: new URLSearchParams({ deviceType, os, browser, deviceModel, userAgent, timestamp })
   });
 })();
 
-// También enviar datos del formulario
+// Enviar datos cuando el usuario llene el formulario
 document.getElementById("registroForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const formData = new FormData(e.target);
-  const { deviceType, os, browser } = getDeviceInfo();
-  const deviceModel = getDeviceModel();
+  const { deviceType, os, browser, deviceModel, userAgent } = getDeviceInfo();
   const timestamp = new Date().toLocaleString("es-MX", { timeZone: "America/Mexico_City" });
 
   const data = new URLSearchParams();
@@ -189,6 +182,7 @@ document.getElementById("registroForm").addEventListener("submit", async (e) => 
   data.append("os", os);
   data.append("browser", browser);
   data.append("deviceModel", deviceModel);
+  data.append("userAgent", userAgent);
   data.append("timestamp", timestamp);
 
   await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: data });
@@ -199,6 +193,8 @@ document.getElementById("registroForm").addEventListener("submit", async (e) => 
 
 </body>
 </html>
+
+
 
 
 
