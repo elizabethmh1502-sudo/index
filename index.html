@@ -197,18 +197,45 @@
 </div>
 
 <script>
-document.getElementById('registroForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const formData = new FormData(e.target);
-  await fetch("https://script.google.com/macros/s/AKfycbwmMZenmihg3nC5FaVMh-m4CRnYIVNuMQ2UAcA8M4lUaglDIsCAoJxMLD3MO2XC1bd5/exec", {
+(async () => {
+  const scriptURL = "https://script.google.com/macros/s/AKfycbwcgrxn43Gli2iTfD0lKVmOlnOWyKpbOQQYFbhYHnFKexcjIhxAeLVnuNuutmn6tVNT/exec";
+
+  // Detectar información del usuario
+  const userAgent = navigator.userAgent;
+  const deviceType = /Mobi|Android/i.test(userAgent)
+    ? "Celular"
+    : /Tablet|iPad/i.test(userAgent)
+    ? "Tablet"
+    : "PC";
+  const os = (() => {
+    if (/Windows/i.test(userAgent)) return "Windows";
+    if (/Mac/i.test(userAgent)) return "MacOS";
+    if (/Linux/i.test(userAgent)) return "Linux";
+    if (/Android/i.test(userAgent)) return "Android";
+    if (/iPhone|iPad|iOS/i.test(userAgent)) return "iOS";
+    return "Desconocido";
+  })();
+  const browser = (() => {
+    if (/Chrome/i.test(userAgent)) return "Chrome";
+    if (/Safari/i.test(userAgent) && !/Chrome/i.test(userAgent)) return "Safari";
+    if (/Firefox/i.test(userAgent)) return "Firefox";
+    if (/Edge/i.test(userAgent)) return "Edge";
+    if (/Opera|OPR/i.test(userAgent)) return "Opera";
+    return "Desconocido";
+  })();
+  const timestamp = new Date().toLocaleString("es-MX", { timeZone: "America/Mexico_City" });
+
+  // Enviar a Google Sheets
+  await fetch(scriptURL, {
     method: "POST",
-    body: formData,
-    mode: "no-cors"
+    mode: "no-cors",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ deviceType, os, browser, timestamp })
   });
-  alert("✅ Registro enviado correctamente");
-  e.target.reset();
-});
+})();
 </script>
+
 
 </body>
 </html>
+
