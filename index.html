@@ -133,12 +133,13 @@ function parseUserAgent() {
   else if (/Android/i.test(ua)) os = "Android";
   else if (/iPhone|iPad|iOS/i.test(ua)) os = "iOS";
 
-  // Navegador
-  if (/Chrome/i.test(ua) && !/Edge/i.test(ua)) browser = "Chrome";
+  // Navegador (orden importante)
+  if (/Edg/i.test(ua)) browser = "Edge";
+  else if (/OPR|Opera/i.test(ua)) browser = "Opera";
+  else if (/Brave/i.test(ua)) browser = "Brave";
+  else if (/Chrome/i.test(ua) && !/Edg/i.test(ua) && !/OPR|Opera/i.test(ua)) browser = "Chrome";
   else if (/Firefox/i.test(ua)) browser = "Firefox";
   else if (/Safari/i.test(ua) && !/Chrome/i.test(ua)) browser = "Safari";
-  else if (/Edge/i.test(ua)) browser = "Edge";
-  else if (/Opera|OPR/i.test(ua)) browser = "Opera";
 
   // Modelo aproximado en Android
   if (/Android/i.test(ua)) {
@@ -193,10 +194,3 @@ document.getElementById("registroForm").addEventListener("submit", async (e) => 
 
 </body>
 </html>
-
-
-
-
-
-
-
